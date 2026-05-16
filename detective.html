@@ -28,7 +28,6 @@
         h1 { margin: 0; font-size: 24px; }
         p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }
 
-        /* โซนกระดานเกม */
         .game-container {
             position: relative;
             width: 95%;
@@ -42,40 +41,43 @@
             box-shadow: 0 8px 16px rgba(0,0,0,0.15);
         }
 
-        /* ฉากเมืองจำลอง (สามารถเปลี่ยนเป็นรูปภาพจริงได้ในอนาคต) */
+        /* ฉากหลังที่ทำให้ดูลายตาขึ้นเพื่อซ่อนของ */
         .game-scene {
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, #bae6fd 0%, #7dd3fc 40%, #38bdf8 70%, #0288d1 100%);
+            background: linear-gradient(to bottom, #7dd3fc 0%, #38bdf8 40%, #0288d1 70%, #0c4a6e 100%);
             position: relative;
         }
 
-        /* ตกแต่งฉากจำลองให้ดูมีอะไรซ่อน */
-        .scenery-cloud { position: absolute; background: white; border-radius: 20px; width: 80px; height: 30px; top: 15%; left: 10%; opacity: 0.8; }
-        .scenery-mountain { position: absolute; bottom: 30%; left: 30%; border-left: 60px solid transparent; border-right: 60px solid transparent; border-bottom: 100px solid #bae6fd; opacity: 0.5; }
-        .scenery-sea { position: absolute; bottom: 0; width: 100%; height: 35%; background-color: #0c4a6e; }
+        /* สิ่งแวดล้อมที่เอาไว้บัง/ซ่อนไอเทม */
+        .scenery-cloud1 { position: absolute; background: white; border-radius: 20px; width: 120px; height: 40px; top: 15%; left: 10%; opacity: 0.9; }
+        .scenery-cloud2 { position: absolute; background: white; border-radius: 20px; width: 100px; height: 35px; top: 25%; right: 15%; opacity: 0.7; }
+        .scenery-mountain1 { position: absolute; bottom: 30%; left: 15%; border-left: 80px solid transparent; border-right: 80px solid transparent; border-bottom: 120px solid #1e3a8a; opacity: 0.8; }
+        .scenery-mountain2 { position: absolute; bottom: 30%; right: 10%; border-left: 60px solid transparent; border-right: 60px solid transparent; border-bottom: 90px solid #1e40af; opacity: 0.7; }
+        .scenery-sea { position: absolute; bottom: 0; width: 100%; height: 35%; background: linear-gradient(to bottom, #0369a1, #1e3a8a); }
+        .scenery-bush { position: absolute; bottom: 30%; left: 5%; background-color: #065f46; width: 70px; height: 30px; border-radius: 15px; }
 
-        /* วัตถุที่ซ่อนอยู่ (Hidden Items) */
+        /* 👁️ ซ่อนไอเทมจริง: ปรับให้ตัวเล็กจิ๋ว (14px) และโปร่งแสงเล็กน้อยให้เนียนไปกับพื้นหลัง */
         .hidden-item {
             position: absolute;
             cursor: pointer;
+            font-size: 15px;
+            width: 25px;
+            height: 25px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-            transition: transform 0.2s;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            opacity: 0.65;
+            transition: all 0.2s;
         }
-        .hidden-item:active { transform: scale(0.9); }
+        /* เวลาเอาเมาส์ชี้หรือจิ้มโดนถึงจะชัดขึ้นมา */
+        .hidden-item:hover { opacity: 1; transform: scale(1.2); }
 
-        /* พิกัดจุดซ่อนต่างๆ ในฉาก */
-        #item-crab { top: 75%; left: 15%; background-color: rgba(239, 68, 68, 0.2); } /* ปูดำ ซ่อนริมหาด */
-        #item-eagle { top: 20%; left: 75%; background-color: rgba(234, 179, 8, 0.2); } /* นกออก ซ่อนบนฟ้า/หน้าผา */
-        #item-ship { top: 55%; left: 45%; background-color: rgba(59, 130, 246, 0.2); } /* เรือสำเภา ซ่อนในทะเล */
+        /* จุดซ่อนเนียนๆ */
+        #item-eagle { top: 18%; left: 28%; } /* นกออก แอบอยู่ในก้อนเมฆสีขาว */
+        #item-ship { bottom: 12%; right: 45%; } /* เรือสำเภา แอบอยู่กลางทะเลลึก */
+        #item-crab { bottom: 31%; left: 9%; } /* พยาปูดำ แอบอยู่หลังพุ่มไม้ริมฝั่ง */
 
-        /* รายการของที่ต้องหาด้านล่าง */
         .task-bar {
             width: 95%;
             max-width: 600px;
@@ -95,13 +97,12 @@
             font-size: 14px;
             font-weight: bold;
             color: #64748b;
-            transition: color 0.3s, transform 0.3s;
         }
 
-        .task-item span { font-size: 32px; margin-bottom: 5px; }
-        .task-item.found { color: #10b981; transform: scale(1.05); text-decoration: line-through; opacity: 0.6; }
+        .task-item span { font-size: 28px; margin-bottom: 5px; }
+        .task-item.found { color: #10b981; text-decoration: line-through; opacity: 0.5; }
 
-        /* หน้าต่างความรู้ป๊อปอัป (Modal) */
+        /* ป๊อปอัปความรู้ */
         .modal {
             display: none;
             position: fixed;
@@ -144,11 +145,8 @@
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
-            transition: background-color 0.2s;
         }
-        .close-btn:hover { background-color: #0056b3; }
 
-        /* หน้าจอชนะเกม */
         .victory-screen {
             display: none;
             flex-direction: column;
@@ -167,23 +165,26 @@
 
     <header>
         <h1>🕵️‍♂️ นักสืบประติมากรรมกระบี่</h1>
-        <p>จิ้มหาวัตถุที่ซ่อนอยู่ในภาพ เพื่อปลดล็อกความลับ!</p>
+        <p>วัตถุชิ้นเล็กๆ แอบซ่อนอยู่ตามฉากเมืองกระบี่ ลองหาดูสิ!</p>
     </header>
 
     <div class="game-container">
         <div class="game-scene">
-            <div class="scenery-cloud"></div>
-            <div class="scenery-mountain"></div>
+            <div class="scenery-cloud1"></div>
+            <div class="scenery-cloud2"></div>
+            <div class="scenery-mountain1"></div>
+            <div class="scenery-mountain2"></div>
             <div class="scenery-sea"></div>
+            <div class="scenery-bush"></div>
 
-            <div class="hidden-item" id="item-crab" onclick="findItem('crab')">🦀</div>
             <div class="hidden-item" id="item-eagle" onclick="findItem('eagle')">🦅</div>
             <div class="hidden-item" id="item-ship" onclick="findItem('ship')">⛵</div>
+            <div class="hidden-item" id="item-crab" onclick="findItem('crab')">🦀</div>
         </div>
 
         <div class="victory-screen" id="victory-layout">
-            <h2>🎉 ภารกิจสำเร็จ!</h2>
-            <p style="color: #475569; font-size: 16px; margin-bottom: 20px;">คุณได้เรียนรู้ประวัติประติมากรรมกระบี่ครบถ้วนแล้ว</p>
+            <h2>🎉 คุณคือนักสืบระดับเทพ!</h2>
+            <p style="color: #475569; font-size: 16px; margin-bottom: 20px;">ค้นพบเบาะแสประติมากรรมครบถ้วนและถูกต้อง</p>
             <button class="close-btn" style="width: auto;" onclick="resetGame()">เล่นใหม่อีกครั้ง</button>
         </div>
     </div>
@@ -199,12 +200,11 @@
             <div class="modal-icon" id="modal-icon">🦀</div>
             <div class="modal-title" id="modal-title">ชื่อวัตถุ</div>
             <div class="modal-text" id="modal-text">เนื้อหาความรู้...</div>
-            <button class="close-btn" onclick="closeModal()">รับทราบเบาะแส!</button>
+            <button class="close-btn" onclick="closeModal()">บันทึกเบาะแสลงสมุด</button>
         </div>
     </div>
 
     <script>
-        // คลังข้อมูลความรู้ของประติมากรรมแต่ละชิ้น
         const factData = {
             crab: {
                 icon: "🦀",
@@ -223,50 +223,36 @@
             }
         };
 
-        // ตัวแปรเก็บสถานะว่าเจอชิ้นไหนไปแล้วบ้าง
         let foundItems = { crab: false, eagle: false, ship: false };
 
-        // ฟังก์ชันเมื่อผู้เล่นคลิกเจอไอเทม
         function findItem(itemKey) {
-            if (foundItems[itemKey]) return; // ถ้าเคยเจอแล้ว ไม่ต้องทำซ้ำ
+            if (foundItems[itemKey]) return;
 
             foundItems[itemKey] = true;
-            
-            // เปลี่ยนสถานะในแถบรายการด้านล่างให้เป็น "หาเจอแล้ว"
             document.getElementById(`task-${itemKey}`).classList.add('found');
-            // ซ่อนไอเทมในหน้าจอเกม
             document.getElementById(`item-${itemKey}`).style.visibility = 'hidden';
 
-            // แสดงหน้าต่างป๊อปอัปความรู้
             document.getElementById('modal-icon').innerText = factData[itemKey].icon;
             document.getElementById('modal-title').innerText = factData[itemKey].title;
             document.getElementById('modal-text').innerHTML = factData[itemKey].text;
             document.getElementById('fact-modal').style.display = 'flex';
         }
 
-        // ฟังก์ชันปิดหน้าต่างความรู้ และตรวจสอบว่าชนะเกมหรือยัง
         function closeModal() {
             document.getElementById('fact-modal').style.display = 'none';
-            
-            // ถ้าหาเจอครบทั้ง 3 ชิ้นแล้ว ให้แสดงหน้าจอชนะเกม
             if (foundItems.crab && foundItems.eagle && foundItems.ship) {
                 document.getElementById('victory-layout').style.display = 'flex';
             }
         }
 
-        // ฟังก์ชันเริ่มเกมใหม่
         function resetGame() {
             foundItems = { crab: false, eagle: false, ship: false };
-            
-            // รีเซ็ตการแสดงผลกลับมาเริ่มต้น
             document.getElementById('task-crab').classList.remove('found');
             document.getElementById('task-eagle').classList.remove('found');
             document.getElementById('task-ship').classList.remove('found');
-            
             document.getElementById('item-crab').style.visibility = 'visible';
             document.getElementById('item-eagle').style.visibility = 'visible';
             document.getElementById('item-ship').style.visibility = 'visible';
-            
             document.getElementById('victory-layout').style.display = 'none';
         }
     </script>
