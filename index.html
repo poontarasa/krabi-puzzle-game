@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมจับคู่ประติมากรรมกระบี่</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #f0fdf4, #dcfce7); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .card-container { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); width: 100%; max-width: 450px; text-align: center; }
+        h1 { color: #16a34a; font-size: 22px; margin-bottom: 5px; }
+        p { color: #64748b; font-size: 14px; margin-bottom: 20px; }
+        
+        /* หน้าต่างกริดการ์ด 4x4 */
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; justify-content: center; }
+        
+        /* ลักษณะของการ์ด */
+        .memory-card { height: 90px; background-color: #22c55e; border-radius: 12px; cursor: pointer; position: relative; transform: scale(1); transform-style: preserve-3d; transition: transform 0.4s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .memory-card:active { transform: scale(0.95); transition: transform 0.1s; }
+        .memory-card.flip { transform: rotateY(180deg); }
+        
+        /* ด้านหน้าและด้านหลังของการ์ด */
+        .front-face, .back-face { width: 100%; height: 100%; padding: 10px; position: absolute; border-radius: 12px; backface-visibility: hidden; display: flex; justify-content: center; align-items: center; }
+        .front-face { transform: rotateY(180deg); background: #f8fafc; border: 2px solid #22c55e; font-size: 36px; }
+        .back-face { background: #16a34a; color: white; font-size: 28px; font-weight: bold; }
+
+        /* หน้าจอสรุปผล */
+        .hide { display: none !important; }
+        .win-message { font-size: 20px; color: #1e293b; font-weight: bold; margin-bottom: 15px; }
+        .btn { background: #16a34a; color: white; border: none; border-radius: 12px; padding: 12px 25px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        .btn:hover { background: #15803d; }
+    </style>
+</head>
+<body>
+
+<div class="card-container">
+    <h1>🧩 พัซเซิลจับคู่ประติกรรมกระบี่</h1>
+    <p id="sub-title">ตามหาคู่การ์ดที่เหมือนกันให้ครบทุกคู่!</p>
+
+    <div class="grid" id="game-grid">
+        </div>
+
+    <div id="win-screen" class="hide">
+        <div class="win-message">🎉 สุดยอดไปเลย! จับคู่ครบทั้งหมดแล้ว 👑</div>
+        <p>คุณมีความจำที่ยอดเยี่ยม เหมาะเป็นผู้นำเที่ยวเมืองกระบี่จริงๆ</p>
+        <button class="btn" onclick="resetGame()">เล่นใหม่อีกครั้ง</button>
+    </div>
+</div>
+
+<script>
+    // รายการการ์ด (จับคู่กันอย่างละ 2 ใบ)
+    // 🦀 = ปูดำ, 🦅 = นกออก (เขาขนาบน้ำ), ⛵ = เรือสำเภาโบราณ, 🐟 = ปลาเสือพ่นน้ำ, 🐘 = ช้าง, 🌴 = ป่าชายเลน, 🌊 = ทะเลอันดามัน, 🐒 = ลิงแสม
+    const cardItems = ['🦀', '🦀', '🦅', '🦅', '⛵', '⛵', '🐟', '🐟', '🐘', '🐘', '🌴', '🌴', '🌊', '🌊', '🐒', '🐒'];
+    
+    let hasFlippedCard = false;
+    let lockBoard = false;
+    let firstCard, secondCard;
+    let matchedPairs = 0;
+
+    const grid = document.getElementById('game-grid');
+    const winScreen = document.getElementById('win-screen');
+    const subTitle = document.getElementById('sub-title');
+
+    function createBoard() {
+        // สับเปลี่ยนตำแหน่งการ์ดแบบสุ่ม (Shuffle)
+        cardItems.sort(() => 0.5 - Math.random());
+
+        grid.innerHTML = '';
+        cardItems.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.classList.add('memory-card');
+            card.dataset.framework = item;
+
+            card.innerHTML = `
+                <div class="front-face">${item}</div>
+                <div class="back-face">?</div>
+            `;
+            
+            card.addEventListener('click', flipCard);
+            grid.appendChild(card);
+        });
+    }
+
+    function flipCard() {
+        if (lockBoard) return;
+        if (this === firstCard) return;
+
+        this.classList.add('flip');
+
+        if (!hasFlippedCard) {
+            // คลิกการ์ดใบแรก
+            hasFlippedCard = true;
+            firstCard = this;
+            return;
+        }
+
+        // คลิกการ์ดใบที่สอง
+        secondCard = this;
+        checkForMatch();
+    }
+
+    function checkForMatch() {
+        let isMatch = firstCard.dataset.framework === secondCard.dataset.framework;
+        isMatch ? disableCards() : unflipCards();
+    }
+
+    function disableCards() {
+        // ถ้าจับคู่ถูก ให้ค้างไว้และปิดการคลิก
+        firstCard.removeEventListener('click', flipCard);
+        secondCard.removeEventListener('click', flipCard);
+        
+        matchedPairs++;
+        if (matchedPairs === cardItems.length / 2) {
+            setTimeout(() => {
+                grid.classList.add('hide');
+                subTitle.classList.add('hide');
+                winScreen.classList.remove('hide');
+            }, 500);
+        }
+
+        resetBoard();
+    }
+
+    function unflipCards() {
+        lockBoard = true;
+        // ถ้าจับคู่ผิด ให้รอ 1 วินาทีแล้วคว่ำการ์ดกลับคืน
+        setTimeout(() => {
+            firstCard.classList.remove('flip');
+            secondCard.classList.remove('flip');
+            resetBoard();
+        }, 1000);
+    }
+
+    function resetBoard() {
+        [hasFlippedCard, lockBoard] = [false, false];
+        [firstCard, secondCard] = [null, null];
+    }
+
+    function resetGame() {
+        matchedPairs = 0;
+        winScreen.classList.add('hide');
+        grid.classList.remove('hide');
+        subTitle.classList.remove('hide');
+        createBoard();
+    }
+
+    // เริ่มสร้างกระดานเกมตอนเปิดเว็บครั้งแรก
+    createBoard();
+</script>
+
+</body>
+</html>
